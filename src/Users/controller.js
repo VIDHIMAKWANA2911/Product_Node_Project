@@ -1,71 +1,63 @@
 const User = require("./model");
 
-// 1. Get All Users
+// 1. Get All
 const getAll = async (req, res) => {
   try {
     const users = await User.find();
-    res.json({ users, msg: "All Users" });
+    return res.json({ users, msg: "All Users Fetched" });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({ msg: "Internal Server Error" });
   }
 };
 
-// 2. Get One User
+// 2. Get One
 const getOne = async (req, res) => {
   try {
-    const id = req.params.id;
+    const id = req.params.index;
     const user = await User.findById(id);
-    if (!user) return res.status(404).json({ msg: "User not found" });
+    if (!user) return res.status(404).json({ msg: "User Not Found" });
     return res.json({ user, msg: "User Found" });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({ msg: "Internal Server Error" });
   }
 };
 
-// 3. Create User
+// 3. Create
 const createOne = async (req, res) => {
   try {
     const { userName, password, contactNo, email } = req.body;
-    if (!userName || !password || !email) {
-      return res.status(400).json({ msg: "Please provide required fields" });
-    }
     const user = await User.create({ userName, password, contactNo, email });
-    res.status(201).json({ msg: "User Created", data: user });
+    return res.status(201).json({ user, msg: "User Created Successfully" });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({ msg: "Internal Server Error" });
   }
 };
 
-// 4. Update User
+// 4. Update
 const updateOne = async (req, res) => {
   try {
     const id = req.params.id;
-    const { userName, password, contactNo, email } = req.body;
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      { userName, password, contactNo, email },
-      { new: true }
-    );
-    if (!updatedUser) return res.status(404).json({ msg: "User not found" });
-    res.json({ msg: "User updated successfully", data: updatedUser });
+    const updatedUser = await User.findByIdAndUpdate(id, req.body, { new: true });
+    if (!updatedUser) return res.status(404).json({ msg: "User Not Found" });
+    return res.json({ updatedUser, msg: "User Updated Successfully" });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({ msg: "Internal Server Error" });
   }
 };
 
-// 5. Delete User
+// 5. Delete
 const deleteOne = async (req, res) => {
   try {
     const id = req.params.id;
-    const result = await User.findByIdAndDelete(id);
-    if (!result) return res.status(404).json({ msg: "User not found" });
-    res.json({ msg: "User deleted successfully", data: result });
+    const deletedUser = await User.findByIdAndDelete(id);
+    if (!deletedUser) return res.status(404).json({ msg: "User Not Found" });
+    return res.json({ deletedUser, msg: "User Deleted Successfully" });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({ msg: "Internal Server Error" });
   }
 };

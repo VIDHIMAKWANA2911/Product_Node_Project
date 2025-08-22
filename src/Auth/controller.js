@@ -17,40 +17,46 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-    try {
+  try {
+    const { identifier, password } = req.body;
+    const user = await User.findOne({
+      $or: [{ userName: identifier }, { email: identifier }]
+    })
 
-const {identifier, password} = req.body;
+    if (!user) return res.status(404).json({ msg: "user not found" })
 
-   const user = await User.findOne({
-    $or: [{userName:identifier},{email:identifier}]
-   })
+    if (user.password !== password) return res.status(401).json({ msg: "password in correct" })
 
-   if(!user) return res.status(404).json ({msg:"user not found"})
-
-    if (user.password !== password) return res.status(401).json({msg:"password in correct"})
-    
-  //  session creation
-  req.session.user = {id:user._id, userName:user.userName, email:user.email}; 
+    //  session creation
+    req.session.user = { id: user._id, userName: user.userName, email: user.email };
     return res.status(200).json({ msg: "User logged in successfully", data: { userName: user.userName, email: user.email } });
-    } catch(error){
-      console.log(error)
-      return res.status(500).json({msg:"login your account"})
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ msg: "login your account" })
 
-    }
-}
-
-const logout = (req, res) => {
-  try{
-    req.session.destroy()
-    return res.json({ msg: "User logged out successfully" })
-  }catch(error){
-    console.log(error);
-    return res.status(500).json({ msg: "Internal Server Error",
-       error: error
-    });
   }
 }
 
+const logout = (req, res) => {
+  try {
+    req.session.destroy((err) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({
+          msg: "Logout failed",
+          error: err
+        });
+      }
+      return res.json({ msg: "User logged out successfully" });
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      msg: "Internal Server Error",
+      error: error
+    });
+  }
+};
 
 
 

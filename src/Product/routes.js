@@ -11,8 +11,9 @@ const {
 
 router.get("/", getAll);            
 router.get("/:id", getOne);        
-router.post("/",upload.single("images"), create);   
 router.put("/:id", updateOne);       
 router.delete("/:id", deleteOne);    
+router.post("/", upload.single("Image"), create);
+
 
 module.exports = router;
