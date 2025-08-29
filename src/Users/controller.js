@@ -1,3 +1,4 @@
+const bcrypt = require("bcrypt");
 const User = require("./model");
 
 // 1. Get All
@@ -24,11 +25,23 @@ const getOne = async (req, res) => {
   }
 };
 
-// 3. Create
+// 3. Create (hash password)
 const createOne = async (req, res) => {
   try {
     const { userName, password, contactNo, email } = req.body;
-    const user = await User.create({ userName, password, contactNo, email });
+    if (!userName || !email || !password) {
+      return res.status(400).json({ msg: "Please required fields" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      userName,
+      password: hashedPassword,
+      contactNo,
+      email,
+    });
+
     return res.status(201).json({ user, msg: "User Created Successfully" });
   } catch (error) {
     console.error(error);
@@ -36,11 +49,19 @@ const createOne = async (req, res) => {
   }
 };
 
-// 4. Update
 const updateOne = async (req, res) => {
   try {
-    const id = req.params.id;
-    const updatedUser = await User.findByIdAndUpdate(id, req.body, { new: true });
+    const id = req.params.index;
+    const updateData = { ...req.body };
+
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
+
     if (!updatedUser) return res.status(404).json({ msg: "User Not Found" });
     return res.json({ updatedUser, msg: "User Updated Successfully" });
   } catch (error) {
@@ -52,7 +73,7 @@ const updateOne = async (req, res) => {
 // 5. Delete
 const deleteOne = async (req, res) => {
   try {
-    const id = req.params.id;
+    const id = req.params.index;
     const deletedUser = await User.findByIdAndDelete(id);
     if (!deletedUser) return res.status(404).json({ msg: "User Not Found" });
     return res.json({ deletedUser, msg: "User Deleted Successfully" });

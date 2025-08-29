@@ -7,7 +7,7 @@ const Path = require("path");
 
 const storge = multer.diskStorage({
     destination:(req,file,cb)=>{
-        cb(null,Path.join(__dirname,"..","..","product","Images"))
+        cb(null,Path.join(__dirname,"..","..","Public","Images"))
     },
     filename:(req,file,cb)=>{
         const profix =Date.now() + "-" + Math.ceil(Math.random() * 10000000);

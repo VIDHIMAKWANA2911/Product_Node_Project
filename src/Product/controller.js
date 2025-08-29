@@ -8,23 +8,9 @@ const getAll = async (req, res) => {
       return res.status(404).json({ msg: "No Products Found" });
     }
 
-    // Cookie counter
-    req.cookies?.count 
-      ? res.cookie("count", Number(req.cookies.count) + 1, { httpOnly: true })
-      : res.cookie("count", 1, { httpOnly: true });
-
-    // Session counter
-    if (!req.session.data) {
-      req.session.data = 1;
-    } else {
-      req.session.data += 1;
-    }
-
     return res.status(200).json({
       msg: "All Products",
-      data: products,
-      count: req.cookies.count,
-      sessionData: req.session.data,
+      data: products
     });
 
   } catch (error) {
@@ -39,7 +25,6 @@ const getOne = async (req, res) => {
     const id = req.params["id"];
     const product = await Product.findById(id);
     if (!product) return res.json({ msg: "Product not found" });
-
     return res.json({ Product: product, msg: "Product Found" });
   } catch (error) {
     console.log(error);
@@ -47,23 +32,28 @@ const getOne = async (req, res) => {
   }
 };
 
-// Create product
+// Create product (with auto logout)
 const create = async (req, res) => {
-  console.log(req.file)
-  console.log(req.body)
   try {
-  let imagePath = "";
-if (req.file) {
-  imagePath = "/Images/" + req.file.filename;
-}
-    const { name, price, desc } = req.body;
+    let imagePath = "";
+    if (req.file) {
+      imagePath = "/Images/" + req.file.filename;
+    }
 
+    const { name, price, desc } = req.body;
     if (!name || !price || !desc) {
       return res.status(400).json({ msg: "Please Provide All Required Fields" });
     }
 
     const product = await Product.create({ name, price, desc, Image: imagePath });
-    res.status(201).json({ msg: "Product Created", data: product });
+    req.session.destroy((err) => {
+      if (err) console.log("Error destroying session:", err);
+    });
+
+    res.status(201).json({ 
+      msg: "Product Created.", 
+      data: product 
+    });
 
   } catch (error) {
     console.log(error);
@@ -84,7 +74,6 @@ const updateOne = async (req, res) => {
     );
 
     if (!updateProduct) return res.json({ msg: "Product not found" });
-
     res.json({ msg: "Product updated successfully", data: updateProduct });
   } catch (error) {
     console.log(error);
