@@ -17,6 +17,7 @@ router.post("/",create)
 router.put("/:id", updateOne);       
 router.delete("/:id", deleteOne);    
 
-router.post("/", AuthUSer, upload.single("Image"), create);
+//router.post("/", AuthUSer, upload.single("Image"), create);//
 
 module.exports = router;
+

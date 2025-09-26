@@ -73,8 +73,20 @@ const updateOne = async (req, res) => {
       { new: true }
     );
 
+    let file = Public.Image
+    let oldfile = ""
+    if(req.file?.filename){
+      oldfile = file
+      file = req.file.filename
+    }
+
     if (!updateProduct) return res.json({ msg: "Product not found" });
     res.json({ msg: "Product updated successfully", data: updateProduct });
+
+    if ( oldfile) {
+      file_path = path_join(__dirname, ".." , ".." , "Public" , "Images" , Public.Images)
+    }
+
   } catch (error) {
     console.log(error);
     return res.status(500).json({ msg: "Internal Server Error" });
@@ -86,7 +98,16 @@ const deleteOne = async (req, res) => {
   try {
     const id = req.params["id"];
     const result = await Product.findByIdAndDelete(id);
+    
+    let file_path = ""
+    if (Public.Image){
+      file_path = path_join(__dirname , ".." , "..", "Public" , "Images" , Public.Image)
+    }
+    if (Public.Image){
+      fs.unlinkSync(file_path)
+    }
     res.json({ msg: "Product Deleted successfully", data: result });
+
   } catch (error) {
     console.log(error);
     return res.status(500).json({ msg: "Internal Server Error" });
